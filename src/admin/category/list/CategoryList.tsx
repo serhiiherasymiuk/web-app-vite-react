@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { ICategory } from "../../../entities/Category.ts";
 import "./CategoryList.scss";
+import { useNavigate } from "react-router-dom";
 
 function CategoryList() {
   const [categories, setCategories] = useState([]);
@@ -11,9 +12,18 @@ function CategoryList() {
     });
   }, []);
 
+  const navigate = useNavigate();
+
   return (
     <div className="category-list">
-      <table className="table">
+      <button
+        type="button"
+        className="btn btn-primary"
+        onClick={() => navigate("create")}
+      >
+        Create
+      </button>
+      <table className="table table-hover">
         <thead>
           <tr>
             <th scope="col">#</th>
