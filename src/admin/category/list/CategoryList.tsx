@@ -35,7 +35,7 @@ function CategoryList() {
         <tbody>
           {categories.map((c: ICategory) => {
             return (
-              <tr key={c.id}>
+              <tr key={c.id} onClick={() => navigate(`edit/${c.id}`)}>
                 <th scope="row">{c.id}</th>
                 <td>{c.name}</td>
                 <td>{c.description}</td>
