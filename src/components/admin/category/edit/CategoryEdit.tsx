@@ -1,25 +1,35 @@
-import "./CategoryCreate.scss";
-import { ICategory, ICategoryCreate } from "../../../entities/Category.ts";
+import "./CategoryEdit.scss";
+import { ICategory, ICategoryEdit } from "../../../../entities/Category.ts";
 import * as Yup from "yup";
 import { ErrorMessage, Field, Form, Formik } from "formik";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import http_common from "../../../../http_common.ts";
 
 function CategoryCreate() {
   const [categories, setCategories] = useState([]);
 
+  const { id } = useParams();
+
   useEffect(() => {
-    axios.get("http://localhost:8080/categories").then((resp) => {
+    http_common.get("categories").then((resp) => {
       setCategories(resp.data);
+    });
+    http_common.get(`category/${id}`).then(async (resp) => {
+      setInitialValues((prevValues) => ({
+        ...prevValues,
+        name: resp.data.name,
+        description: resp.data.description,
+        image: resp.data.image,
+      }));
     });
   }, []);
 
-  const initialValues: ICategoryCreate = {
+  const [initialValues, setInitialValues] = useState<ICategoryEdit>({
     name: "",
     description: "",
     image: "",
-  };
+  });
 
   const categorySchema = Yup.object().shape({
     name: Yup.string()
@@ -30,7 +40,8 @@ function CategoryCreate() {
           return false;
         }
         const categoryExists = categories.some(
-          (c: ICategory) => c.name.toLowerCase() === value.toLowerCase(),
+          (c: ICategory) =>
+            c.name.toLowerCase() === value.toLowerCase() && c.id !== Number(id),
         );
         return !categoryExists;
       }),
@@ -43,13 +54,13 @@ function CategoryCreate() {
 
   const navigate = useNavigate();
 
-  const handleSubmit = async (values: ICategoryCreate) => {
+  const handleSubmit = async (values: ICategoryEdit) => {
     try {
       await categorySchema.validate(values);
 
-      await axios.post("http://localhost:8080/category", values);
+      await http_common.put(`category/${id}`, values);
 
-      navigate("..");
+      navigate("../..");
     } catch (error) {
       console.error("Error adding category:", error);
     }
@@ -61,12 +72,13 @@ function CategoryCreate() {
         initialValues={initialValues}
         onSubmit={handleSubmit}
         validationSchema={categorySchema}
+        enableReinitialize={true}
       >
-        {({ errors, touched, setFieldValue, handleBlur }) => (
-          <Form className="category-create-form">
+        {({ errors, touched, setFieldValue, handleBlur, values }) => (
+          <Form className="category-edit-form">
             <i
               className="bi bi-arrow-left-circle-fill back-button"
-              onClick={() => navigate("..")}
+              onClick={() => navigate("../..")}
             ></i>
             <div className="form-floating">
               <Field
@@ -96,6 +108,7 @@ function CategoryCreate() {
                 name="description"
                 aria-label="Description"
                 aria-describedby="basic-addon2"
+                value={values.description}
                 onChange={(event) => {
                   setFieldValue("description", event.currentTarget.value);
                 }}
@@ -127,7 +140,7 @@ function CategoryCreate() {
             </div>
 
             <button type="submit" className="btn btn-primary">
-              Create
+              Save
             </button>
           </Form>
         )}

@@ -1,22 +1,22 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { ICategory } from "../../../entities/Category.ts";
+import { ICategory } from "../../../../entities/Category.ts";
 import "./CategoryList.scss";
 import { useNavigate } from "react-router-dom";
-import ModalDelete from "../../../common/ModalDelete.tsx";
+import ModalDelete from "../../../../common/ModalDelete.tsx";
+import http_common from "../../../../http_common.ts";
 
 function CategoryList() {
   const [categories, setCategories] = useState([]);
   useEffect(() => {
-    axios.get("http://localhost:8080/categories").then((resp) => {
+    http_common.get("categories").then((resp) => {
       setCategories(resp.data);
     });
   }, []);
 
   const handleDelete = async (id: number) => {
     try {
-      await axios.delete(`http://localhost:8080/category/${id}`).then(() => {
-        axios.get("http://localhost:8080/categories").then((resp) => {
+      await http_common.delete(`category/${id}`).then(() => {
+        http_common.get("categories").then((resp) => {
           setCategories(resp.data);
         });
       });

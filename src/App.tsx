@@ -1,8 +1,8 @@
 import "./App.scss";
-import CategoryList from "./admin/category/list/CategoryList.tsx";
+import CategoryList from "./components/admin/category/list/CategoryList.tsx";
 import { Route, Routes } from "react-router-dom";
-import CategoryCreate from "./admin/category/create/CategoryCreate.tsx";
-import CategoryEdit from "./admin/category/edit/CategoryEdit.tsx";
+import CategoryCreate from "./components/admin/category/create/CategoryCreate.tsx";
+import CategoryEdit from "./components/admin/category/edit/CategoryEdit.tsx";
 
 function App() {
   return (
