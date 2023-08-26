@@ -8,15 +8,15 @@ import http_common from "../../../../http_common.ts";
 function CategoryList() {
   const [categories, setCategories] = useState([]);
   useEffect(() => {
-    http_common.get("categories").then((resp) => {
+    http_common.get("api/categories").then((resp) => {
       setCategories(resp.data);
     });
   }, []);
 
   const handleDelete = async (id: number) => {
     try {
-      await http_common.delete(`category/${id}`).then(() => {
-        http_common.get("categories").then((resp) => {
+      await http_common.delete(`api/categories/${id}`).then(() => {
+        http_common.get("api/categories").then((resp) => {
           setCategories(resp.data);
         });
       });
@@ -54,7 +54,7 @@ function CategoryList() {
                 <td>{c.name}</td>
                 <td>{c.description}</td>
                 <td>
-                  <img src={c.image} alt="" />
+                  <img src={`http://localhost:8080/images/${c.image}`} alt="" />
                 </td>
                 <td
                   onClick={(e) => {

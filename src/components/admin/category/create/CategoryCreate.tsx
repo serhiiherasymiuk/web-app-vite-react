@@ -10,7 +10,7 @@ function CategoryCreate() {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    http_common.get("categories").then((resp) => {
+    http_common.get("api/categories").then((resp) => {
       setCategories(resp.data);
     });
   }, []);
@@ -18,7 +18,7 @@ function CategoryCreate() {
   const initialValues: ICategoryCreate = {
     name: "",
     description: "",
-    image: "",
+    image: null,
   };
 
   const categorySchema = Yup.object().shape({
@@ -37,8 +37,7 @@ function CategoryCreate() {
     description: Yup.string()
       .required("Description is required")
       .max(4000, "Description must be smaller"),
-    categoryId: Yup.number(),
-    image: Yup.string().url("Url is incorrect").required("Image is required"),
+    image: Yup.mixed().required("Image is required"),
   });
 
   const navigate = useNavigate();
@@ -47,22 +46,34 @@ function CategoryCreate() {
     try {
       await categorySchema.validate(values);
 
-      await http_common.post("category", values);
+      await http_common.post("api/categories", values, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       navigate("..");
     } catch (error) {
-      console.error("Error adding category:", error);
+      console.error("Error creating category:", error);
     }
   };
 
   return (
-    <div className="category-create">
+    <>
       <Formik
         initialValues={initialValues}
         onSubmit={handleSubmit}
         validationSchema={categorySchema}
       >
-        {({ errors, touched, setFieldValue, handleBlur }) => (
+        {({
+          values,
+          setTouched,
+          validateForm,
+          errors,
+          touched,
+          setFieldValue,
+          handleBlur,
+        }) => (
           <Form className="category-create-form">
             <i
               className="bi bi-arrow-left-circle-fill back-button"
@@ -107,32 +118,56 @@ function CategoryCreate() {
                 className="invalid-feedback"
               />
             </div>
-            <div className="form-floating">
-              <Field
-                type="text"
-                className={`form-control ${
-                  errors.image && touched.image ? "is-invalid" : ""
-                }`}
-                placeholder="Image"
-                name="image"
-                aria-label="Image"
-                aria-describedby="basic-addon2"
-              />
-              <label htmlFor="floatingTextarea2">Image</label>
-              <ErrorMessage
-                name="image"
-                component="div"
-                className="invalid-feedback"
-              />
+            <div className="image-list">
+              {values.image ? (
+                <div>
+                  <i
+                    onClick={() => {
+                      setFieldValue("image", null).then(() => {
+                        validateForm();
+                      });
+                    }}
+                    className="bi bi-x-circle-fill"
+                  ></i>
+                  <img src={URL.createObjectURL(values.image)} alt="" />
+                </div>
+              ) : (
+                <label
+                  className={`custom-file-upload ${
+                    errors.image && touched.image ? "is-image-invalid" : ""
+                  }`}
+                >
+                  <input
+                    multiple
+                    type="file"
+                    name="image"
+                    accept="image/*"
+                    onChange={(event) => {
+                      const file =
+                        event.currentTarget.files &&
+                        event.currentTarget.files[0];
+                      if (file) {
+                        setFieldValue("image", file);
+                      }
+                      validateForm();
+                      setTouched({
+                        ...touched,
+                        image: true,
+                      });
+                    }}
+                  />
+                  <i className="bi bi-plus"></i>
+                  <i className="bi bi-exclamation-circle exc"></i>
+                </label>
+              )}
             </div>
-
             <button type="submit" className="btn btn-primary">
               Create
             </button>
           </Form>
         )}
       </Formik>
-    </div>
+    </>
   );
 }
 

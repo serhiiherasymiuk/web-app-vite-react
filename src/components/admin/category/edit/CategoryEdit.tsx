@@ -6,21 +6,26 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import http_common from "../../../../http_common.ts";
 
-function CategoryCreate() {
+function CategoryEdit() {
   const [categories, setCategories] = useState([]);
 
   const { id } = useParams();
 
   useEffect(() => {
-    http_common.get("categories").then((resp) => {
+    http_common.get("api/categories").then((resp) => {
       setCategories(resp.data);
     });
-    http_common.get(`category/${id}`).then(async (resp) => {
+    http_common.get(`api/categories/${id}`).then(async (resp) => {
+      const response = await http_common.get(`/images/${resp.data.image}`, {
+        responseType: "blob",
+      });
+      const blob = response.data;
+
       setInitialValues((prevValues) => ({
         ...prevValues,
         name: resp.data.name,
         description: resp.data.description,
-        image: resp.data.image,
+        image: new File([blob], resp.data.image),
       }));
     });
   }, []);
@@ -28,7 +33,7 @@ function CategoryCreate() {
   const [initialValues, setInitialValues] = useState<ICategoryEdit>({
     name: "",
     description: "",
-    image: "",
+    image: null,
   });
 
   const categorySchema = Yup.object().shape({
@@ -48,33 +53,45 @@ function CategoryCreate() {
     description: Yup.string()
       .required("Description is required")
       .max(4000, "Description must be smaller"),
-    categoryId: Yup.number(),
-    image: Yup.string().url("Url is incorrect").required("Image is required"),
+    image: Yup.mixed().required("Image is required"),
   });
 
   const navigate = useNavigate();
 
   const handleSubmit = async (values: ICategoryEdit) => {
+    console.log(values);
     try {
       await categorySchema.validate(values);
 
-      await http_common.put(`category/${id}`, values);
+      await http_common.put(`api/categories/${id}`, values, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       navigate("../..");
     } catch (error) {
-      console.error("Error adding category:", error);
+      console.error("Error saving category:", error);
     }
   };
 
   return (
-    <div className="category-create">
+    <>
       <Formik
         initialValues={initialValues}
         onSubmit={handleSubmit}
         validationSchema={categorySchema}
         enableReinitialize={true}
       >
-        {({ errors, touched, setFieldValue, handleBlur, values }) => (
+        {({
+          values,
+          validateForm,
+          setTouched,
+          errors,
+          touched,
+          setFieldValue,
+          handleBlur,
+        }) => (
           <Form className="category-edit-form">
             <i
               className="bi bi-arrow-left-circle-fill back-button"
@@ -120,33 +137,57 @@ function CategoryCreate() {
                 className="invalid-feedback"
               />
             </div>
-            <div className="form-floating">
-              <Field
-                type="text"
-                className={`form-control ${
-                  errors.image && touched.image ? "is-invalid" : ""
-                }`}
-                placeholder="Image"
-                name="image"
-                aria-label="Image"
-                aria-describedby="basic-addon2"
-              />
-              <label htmlFor="floatingTextarea2">Image</label>
-              <ErrorMessage
-                name="image"
-                component="div"
-                className="invalid-feedback"
-              />
+            <div className="image-list">
+              {values.image ? (
+                <div>
+                  <i
+                    onClick={() => {
+                      setFieldValue("image", null).then(() => {
+                        validateForm();
+                      });
+                    }}
+                    className="bi bi-x-circle-fill"
+                  ></i>
+                  <img src={URL.createObjectURL(values.image)} alt="" />
+                </div>
+              ) : (
+                <label
+                  className={`custom-file-upload ${
+                    errors.image && touched.image ? "is-image-invalid" : ""
+                  }`}
+                >
+                  <input
+                    multiple
+                    type="file"
+                    name="image"
+                    accept="image/*"
+                    onChange={(event) => {
+                      const file =
+                        event.currentTarget.files &&
+                        event.currentTarget.files[0];
+                      if (file) {
+                        setFieldValue("image", file);
+                      }
+                      validateForm();
+                      setTouched({
+                        ...touched,
+                        image: true,
+                      });
+                    }}
+                  />
+                  <i className="bi bi-plus"></i>
+                  <i className="bi bi-exclamation-circle exc"></i>
+                </label>
+              )}
             </div>
-
             <button type="submit" className="btn btn-primary">
               Save
             </button>
           </Form>
         )}
       </Formik>
-    </div>
+    </>
   );
 }
 
-export default CategoryCreate;
+export default CategoryEdit;
