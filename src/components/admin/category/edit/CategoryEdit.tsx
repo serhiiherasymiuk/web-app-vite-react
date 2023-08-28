@@ -16,9 +16,12 @@ function CategoryEdit() {
       setCategories(resp.data);
     });
     http_common.get(`api/categories/${id}`).then(async (resp) => {
-      const response = await http_common.get(`/images/${resp.data.image}`, {
-        responseType: "blob",
-      });
+      const response = await http_common.get(
+        `/uploading/300_${resp.data.image}`,
+        {
+          responseType: "blob",
+        },
+      );
       const blob = response.data;
 
       setInitialValues((prevValues) => ({
@@ -59,7 +62,6 @@ function CategoryEdit() {
   const navigate = useNavigate();
 
   const handleSubmit = async (values: ICategoryEdit) => {
-    console.log(values);
     try {
       await categorySchema.validate(values);
 
@@ -144,6 +146,10 @@ function CategoryEdit() {
                     onClick={() => {
                       setFieldValue("image", null).then(() => {
                         validateForm();
+                      });
+                      setTouched({
+                        ...touched,
+                        image: true,
                       });
                     }}
                     className="bi bi-x-circle-fill"

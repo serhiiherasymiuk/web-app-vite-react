@@ -54,7 +54,10 @@ function CategoryList() {
                 <td>{c.name}</td>
                 <td>{c.description}</td>
                 <td>
-                  <img src={`http://localhost:8080/images/${c.image}`} alt="" />
+                  <img
+                    src={`http://localhost:8080/uploading/300_${c.image}`}
+                    alt=""
+                  />
                 </td>
                 <td
                   onClick={(e) => {
