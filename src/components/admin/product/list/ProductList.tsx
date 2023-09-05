@@ -1,27 +1,28 @@
 import { useEffect, useState } from "react";
-import { ICategory } from "../../../../entities/Category.ts";
 import { useNavigate } from "react-router-dom";
 import ModalDelete from "../../../../common/ModalDelete.tsx";
 import http_common from "../../../../http_common.ts";
+import { IProduct } from "../../../../entities/Product.ts";
 import { APP_ENV } from "../../../../env";
+import { IProductImage } from "../../../../entities/ProductImage.ts";
 
-function CategoryList() {
-  const [categories, setCategories] = useState<ICategory[]>([]);
+function ProductList() {
+  const [products, setProducts] = useState<IProduct[]>([]);
   useEffect(() => {
-    http_common.get("api/categories").then((resp) => {
-      setCategories(resp.data);
+    http_common.get("api/products").then((resp) => {
+      setProducts(resp.data);
     });
   }, []);
 
   const handleDelete = async (id: number) => {
     try {
-      await http_common.delete(`api/categories/${id}`).then(() => {
-        http_common.get("api/categories").then((resp) => {
-          setCategories(resp.data);
+      await http_common.delete(`api/products/${id}`).then(() => {
+        http_common.get("api/products").then((resp) => {
+          setProducts(resp.data);
         });
       });
     } catch (error) {
-      console.error("Error deleting category:", error);
+      console.error("Error deleting product:", error);
     }
   };
 
@@ -50,7 +51,7 @@ function CategoryList() {
                 Description
               </th>
               <th scope="col" className="px-6 py-3">
-                Image
+                Images
               </th>
               <th scope="col" className="px-6 py-3">
                 Actions
@@ -58,26 +59,32 @@ function CategoryList() {
             </tr>
           </thead>
           <tbody>
-            {categories.map((c: ICategory) => {
+            {products.map((p: IProduct) => {
               return (
                 <tr
-                  key={c.id}
-                  onClick={() => navigate(`edit/${c.id}`)}
+                  key={p.id}
+                  onClick={() => navigate(`edit/${p.id}`)}
                   className="cursor-pointer border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                 >
                   <th
                     scope="row"
                     className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                   >
-                    {c.id}
+                    {p.id}
                   </th>
-                  <td className="px-6 py-4">{c.name}</td>
-                  <td className="px-6 py-4">{c.description}</td>
+                  <td className="px-6 py-4">{p.name}</td>
+                  <td className="px-6 py-4">{p.description}</td>
                   <td className="px-6 py-4">
-                    <img
-                      src={`${APP_ENV.BASE_URL}/uploading/300_${c.image}`}
-                      alt=""
-                    />
+                    {p.images.map((i: IProductImage) => {
+                      return (
+                        <img
+                          key={i.id}
+                          className="mb-1"
+                          src={`${APP_ENV.BASE_URL}/uploading/300_${i.image}`}
+                          alt=""
+                        />
+                      );
+                    })}
                   </td>
                   <td
                     className="px-6 py-4"
@@ -86,8 +93,8 @@ function CategoryList() {
                     }}
                   >
                     <ModalDelete
-                      id={c.id}
-                      text={c.name}
+                      id={p.id}
+                      text={p.name}
                       deleteFunc={handleDelete}
                     ></ModalDelete>
                   </td>
@@ -101,4 +108,4 @@ function CategoryList() {
   );
 }
 
-export default CategoryList;
+export default ProductList;

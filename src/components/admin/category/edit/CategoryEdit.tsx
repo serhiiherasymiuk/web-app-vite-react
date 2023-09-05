@@ -1,12 +1,12 @@
 import { ICategory, ICategoryEdit } from "../../../../entities/Category.ts";
 import * as Yup from "yup";
-import { ErrorMessage, Form, Formik } from "formik";
+import { Form, Formik } from "formik";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import http_common from "../../../../http_common.ts";
 
 function CategoryEdit() {
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<ICategory[]>([]);
 
   const { id } = useParams();
 
@@ -70,9 +70,9 @@ function CategoryEdit() {
         },
       });
 
-      navigate("../..");
+      navigate("..");
     } catch (error) {
-      console.error("Error saving category:", error);
+      console.error("Error editing category:", error);
     }
   };
 
@@ -84,11 +84,18 @@ function CategoryEdit() {
         validationSchema={categorySchema}
         enableReinitialize={true}
       >
-        {({ values, errors, touched, setFieldValue, handleBlur }) => (
-          <Form className="category-edit-form">
+        {({
+          handleChange,
+          values,
+          errors,
+          touched,
+          setFieldValue,
+          handleBlur,
+        }) => (
+          <Form>
             <i
               className="bi bi-arrow-left-circle-fill back-button"
-              onClick={() => navigate("../..")}
+              onClick={() => navigate("..")}
             ></i>
             <div className="mb-6">
               <input
@@ -104,15 +111,13 @@ function CategoryEdit() {
                 aria-label="Name"
                 aria-describedby="basic-addon2"
                 value={values.name}
-                onChange={(event) => {
-                  setFieldValue("name", event.currentTarget.value);
-                }}
+                onChange={handleChange}
               />
-              <ErrorMessage
-                name="name"
-                component="div"
-                className="mt-2 text-sm text-red-600 dark:text-red-500"
-              />
+              {errors.name && touched.name && (
+                <div className="mt-2 text-sm text-red-600 dark:text-red-500">
+                  {errors.name}
+                </div>
+              )}
             </div>
             <div className="mb-6">
               <textarea
@@ -127,15 +132,13 @@ function CategoryEdit() {
                 aria-label="Description"
                 aria-describedby="basic-addon2"
                 value={values.description}
-                onChange={(event) => {
-                  setFieldValue("description", event.currentTarget.value);
-                }}
+                onChange={handleChange}
               />
-              <ErrorMessage
-                name="description"
-                component="div"
-                className="mt-2 text-sm text-red-600 dark:text-red-500"
-              />
+              {errors.description && touched.description && (
+                <div className="mt-2 text-sm text-red-600 dark:text-red-500">
+                  {errors.description}
+                </div>
+              )}
             </div>
             <div className="mb-6 items-center justify-center w-full">
               <label
@@ -164,9 +167,9 @@ function CategoryEdit() {
                     >
                       <path
                         stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
                         d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
                       />
                     </svg>

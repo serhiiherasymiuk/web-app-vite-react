@@ -1,11 +1,12 @@
-import { ICategory, ICategoryCreate } from "../../../../entities/Category.ts";
+import { ICategory } from "../../../../entities/Category.ts";
 import * as Yup from "yup";
 import { Form, Formik } from "formik";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import http_common from "../../../../http_common.ts";
+import { IProductCreate } from "../../../../entities/Product.ts";
 
-function CategoryCreate() {
+function ProductCreate() {
   const [categories, setCategories] = useState<ICategory[]>([]);
 
   useEffect(() => {
@@ -14,38 +15,38 @@ function CategoryCreate() {
     });
   }, []);
 
-  const initialValues: ICategoryCreate = {
+  const initialValues: IProductCreate = {
     name: "",
     description: "",
-    image: null,
+    categoryId: null,
+    images: [],
   };
 
-  const categorySchema = Yup.object().shape({
+  const productSchema = Yup.object().shape({
     name: Yup.string()
       .required("Name is required")
-      .max(255, "Name must be smaller")
-      .test("unique-category", "Category already exists", function (value) {
-        if (!value) {
-          return false;
-        }
-        const categoryExists = categories.some(
-          (c: ICategory) => c.name.toLowerCase() === value.toLowerCase(),
-        );
-        return !categoryExists;
-      }),
+      .max(255, "Name must be smaller"),
     description: Yup.string()
       .required("Description is required")
       .max(4000, "Description must be smaller"),
-    image: Yup.mixed().required("Image is required"),
+    categoryId: Yup.number()
+      .required("Category is required")
+      .test("category-required", "Category is required", function (value) {
+        if (value === -1) return false;
+        else return true;
+      }),
+    images: Yup.array()
+      .required("At least one image is required")
+      .min(1, "At least one image is required"),
   });
 
   const navigate = useNavigate();
 
-  const handleSubmit = async (values: ICategoryCreate) => {
+  const handleSubmit = async (values: IProductCreate) => {
     try {
-      await categorySchema.validate(values);
+      await productSchema.validate(values);
 
-      await http_common.post("api/categories", values, {
+      await http_common.post("api/products", values, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -53,7 +54,7 @@ function CategoryCreate() {
 
       navigate("..");
     } catch (error) {
-      console.error("Error creating category:", error);
+      console.error("Error creating product:", error);
     }
   };
 
@@ -62,14 +63,14 @@ function CategoryCreate() {
       <Formik
         initialValues={initialValues}
         onSubmit={handleSubmit}
-        validationSchema={categorySchema}
+        validationSchema={productSchema}
       >
         {({
-          handleChange,
           values,
+          setFieldValue,
+          handleChange,
           errors,
           touched,
-          setFieldValue,
           handleBlur,
         }) => (
           <Form>
@@ -118,48 +119,91 @@ function CategoryCreate() {
                 </div>
               )}
             </div>
+            <div className="mb-6">
+              <select
+                onBlur={handleBlur}
+                name="categoryId"
+                className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 ${
+                  errors.categoryId && touched.categoryId
+                    ? "bg-red-50 border border-red-500 text-red-900 placeholder-red-700 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-red-100 dark:border-red-400"
+                    : ""
+                }`}
+                onChange={(event) => {
+                  setFieldValue("categoryId", event.currentTarget.value);
+                }}
+              >
+                <option selected value={-1}>
+                  Choose a category
+                </option>
+                {categories.map((c: ICategory) => {
+                  return (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  );
+                })}
+              </select>
+              {errors.categoryId && touched.categoryId && (
+                <div className="mt-2 text-sm text-red-600 dark:text-red-500">
+                  {errors.categoryId}
+                </div>
+              )}
+            </div>
+            <div className="grid grid-cols-3 justify-items-center">
+              {values.images.map((f: File, id: number) => {
+                return (
+                  <div className="mb-6 h-80 w-80">
+                    <i
+                      onClick={() => {
+                        const filteredImages = values.images.filter(
+                          (image) => image !== f,
+                        );
+                        setFieldValue("images", filteredImages);
+                      }}
+                      className="absolute -mt-4 -ml-4 bi-x-circle text-2xl text-[30px] cursor-pointer text-red-600"
+                    ></i>
+                    <img
+                      key={id}
+                      src={URL.createObjectURL(f)}
+                      className="object-cover h-80 w-80"
+                    />
+                  </div>
+                );
+              })}
+            </div>
             <div className="mb-6 items-center justify-center w-full">
               <label
                 htmlFor="dropzone-file"
                 className={`flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 ${
-                  errors.image && touched.image
+                  errors.images && touched.images
                     ? "border-red-500 dark:border-red-400 bg-red-50"
                     : "dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:hover:border-gray-500 dark:hover:bg-gray-600"
                 }`}
               >
-                {values.image ? (
-                  <img
-                    src={URL.createObjectURL(values.image)}
-                    alt="Selected"
-                    className="p-1 object-fill rounded-lg cursor-pointer"
-                    style={{ maxWidth: "100%", maxHeight: "100%" }}
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <svg
-                      className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 20 16"
-                    >
-                      <path
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                      />
-                    </svg>
-                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                      <span className="font-semibold">Click to upload</span> or
-                      drag and drop
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      SVG, PNG, JPG
-                    </p>
-                  </div>
-                )}
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <svg
+                    className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 20 16"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                    />
+                  </svg>
+                  <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                    <span className="font-semibold">Click to upload</span> or
+                    drag and drop
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    SVG, PNG, JPG
+                  </p>
+                </div>
               </label>
               <input
                 id="dropzone-file"
@@ -171,16 +215,17 @@ function CategoryCreate() {
                   const file =
                     event.currentTarget.files && event.currentTarget.files[0];
                   if (file) {
-                    setFieldValue("image", file);
+                    setFieldValue("images", [...values.images, file]);
                   }
                 }}
               />
-              {errors.image && touched.image && (
+              {errors.images && touched.images && (
                 <div className="mt-2 text-sm text-red-600 dark:text-red-500">
-                  {errors.image}
+                  {errors.images.toString()}
                 </div>
               )}
             </div>
+
             <button
               type="submit"
               className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
@@ -194,4 +239,4 @@ function CategoryCreate() {
   );
 }
 
-export default CategoryCreate;
+export default ProductCreate;
