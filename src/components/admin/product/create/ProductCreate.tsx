@@ -5,6 +5,10 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import http_common from "../../../../http_common.ts";
 import { IProductCreate } from "../../../../entities/Product.ts";
+import InputGroup from "../../../../common/InputGroup.tsx";
+import TextAreaGroup from "../../../../common/TextAreaGroup.tsx";
+import SelectGroup from "../../../../common/SelectGroup.tsx";
+import ImageListGroup from "../../../../common/ImageListGroup.tsx";
 
 function ProductCreate() {
   const [categories, setCategories] = useState<ICategory[]>([]);
@@ -78,154 +82,41 @@ function ProductCreate() {
               className="bi bi-arrow-left-circle-fill back-button"
               onClick={() => navigate("..")}
             ></i>
-            <div className="mb-6">
-              <input
-                onBlur={handleBlur}
-                className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 ${
-                  errors.name && touched.name
-                    ? "bg-red-50 border border-red-500 text-red-900 placeholder-red-700 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-red-100 dark:border-red-400"
-                    : ""
-                }`}
-                type="text"
-                placeholder="Name"
-                name="name"
-                aria-label="Name"
-                aria-describedby="basic-addon2"
-                onChange={handleChange}
-              />
-              {errors.name && touched.name && (
-                <div className="mt-2 text-sm text-red-600 dark:text-red-500">
-                  {errors.name}
-                </div>
-              )}
-            </div>
-            <div className="mb-6">
-              <textarea
-                onBlur={handleBlur}
-                className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 ${
-                  errors.description && touched.description
-                    ? "bg-red-50 border border-red-500 text-red-900 placeholder-red-700 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-red-100 dark:border-red-400"
-                    : ""
-                }`}
-                placeholder="Description"
-                name="description"
-                aria-label="Description"
-                aria-describedby="basic-addon2"
-                onChange={handleChange}
-              />
-              {errors.description && touched.description && (
-                <div className="mt-2 text-sm text-red-600 dark:text-red-500">
-                  {errors.description}
-                </div>
-              )}
-            </div>
-            <div className="mb-6">
-              <select
-                onBlur={handleBlur}
-                name="categoryId"
-                className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 ${
-                  errors.categoryId && touched.categoryId
-                    ? "bg-red-50 border border-red-500 text-red-900 placeholder-red-700 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-red-100 dark:border-red-400"
-                    : ""
-                }`}
-                onChange={(event) => {
-                  setFieldValue("categoryId", event.currentTarget.value);
-                }}
-              >
-                <option selected value={-1}>
-                  Choose a category
-                </option>
-                {categories.map((c: ICategory) => {
-                  return (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  );
-                })}
-              </select>
-              {errors.categoryId && touched.categoryId && (
-                <div className="mt-2 text-sm text-red-600 dark:text-red-500">
-                  {errors.categoryId}
-                </div>
-              )}
-            </div>
-            <div className="grid grid-cols-3 justify-items-center">
-              {values.images.map((f: File, id: number) => {
-                return (
-                  <div className="mb-6 h-80 w-80">
-                    <i
-                      onClick={() => {
-                        const filteredImages = values.images.filter(
-                          (image) => image !== f,
-                        );
-                        setFieldValue("images", filteredImages);
-                      }}
-                      className="absolute -mt-4 -ml-4 bi-x-circle text-2xl text-[30px] cursor-pointer text-red-600"
-                    ></i>
-                    <img
-                      key={id}
-                      src={URL.createObjectURL(f)}
-                      className="object-cover h-80 w-80"
-                    />
-                  </div>
-                );
-              })}
-            </div>
-            <div className="mb-6 items-center justify-center w-full">
-              <label
-                htmlFor="dropzone-file"
-                className={`flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 ${
-                  errors.images && touched.images
-                    ? "border-red-500 dark:border-red-400 bg-red-50"
-                    : "dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-                }`}
-              >
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <svg
-                    className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 20 16"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                    />
-                  </svg>
-                  <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                    <span className="font-semibold">Click to upload</span> or
-                    drag and drop
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    SVG, PNG, JPG
-                  </p>
-                </div>
-              </label>
-              <input
-                id="dropzone-file"
-                type="file"
-                className="hidden"
-                name="image"
-                accept="image/*"
-                onChange={(event) => {
-                  const file =
-                    event.currentTarget.files && event.currentTarget.files[0];
-                  if (file) {
-                    setFieldValue("images", [...values.images, file]);
-                  }
-                }}
-              />
-              {errors.images && touched.images && (
-                <div className="mt-2 text-sm text-red-600 dark:text-red-500">
-                  {errors.images.toString()}
-                </div>
-              )}
-            </div>
-
+            <InputGroup
+              label="Name"
+              type="text"
+              field="name"
+              handleBlur={handleBlur}
+              error={errors.name}
+              touched={touched.name}
+              handleChange={handleChange}
+            ></InputGroup>
+            <TextAreaGroup
+              label="Description"
+              field="description"
+              handleChange={handleChange}
+              error={errors.description}
+              touched={touched.description}
+              handleBlur={handleBlur}
+              value={values.description}
+            ></TextAreaGroup>
+            <SelectGroup
+              label="Category"
+              field="categoryId"
+              handleChange={handleChange}
+              error={errors.categoryId}
+              touched={touched.categoryId}
+              handleBlur={handleBlur}
+              options={categories}
+              optionKey="id"
+              optionLabel="name"
+            ></SelectGroup>
+            <ImageListGroup
+              images={values.images}
+              setFieldValue={setFieldValue}
+              error={errors.images}
+              touched={touched.images}
+            ></ImageListGroup>
             <button
               type="submit"
               className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
