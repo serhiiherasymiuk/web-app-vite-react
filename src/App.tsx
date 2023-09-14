@@ -8,6 +8,8 @@ import CategoryEdit from "./components/admin/category/edit/CategoryEdit.tsx";
 import ProductList from "./components/admin/product/list/ProductList.tsx";
 import ProductCreate from "./components/admin/product/create/ProductCreate.tsx";
 import ProductEdit from "./components/admin/product/edit/ProductEdit.tsx";
+import Register from "./components/auth/register/Register.tsx";
+import Login from "./components/auth/login/Login.tsx";
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
           <Route path={"create"} element={<ProductCreate />} />
           <Route path={"edit/:id"} element={<ProductEdit />} />
         </Route>
+        <Route path={"register"} element={<Register />}></Route>
+        <Route path={"login"} element={<Login />}></Route>
       </Route>
     </Routes>
   );
