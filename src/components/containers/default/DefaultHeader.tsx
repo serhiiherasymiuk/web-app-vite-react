@@ -1,4 +1,15 @@
+import { Link } from "react-router-dom";
+import { AuthUserActionType } from "../../../entities/Auth.ts";
+import { useDispatch } from "react-redux";
+
 const DefaultHeader = () => {
+  const dispatch = useDispatch();
+  const onLogoutHandler = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("access_token");
+    dispatch({ type: AuthUserActionType.LOGOUT_USER });
+  };
+
   return (
     <>
       <header className="mb-6">
@@ -44,6 +55,14 @@ const DefaultHeader = () => {
                 </div>
                 <ul className="py-2" aria-labelledby="user-menu-button">
                   <li>
+                    <Link
+                      to={"/admin"}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                    >
+                      Admin panel
+                    </Link>
+                  </li>
+                  <li>
                     <a
                       href="#"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
@@ -68,12 +87,12 @@ const DefaultHeader = () => {
                     </a>
                   </li>
                   <li>
-                    <a
-                      href="#"
+                    <button
+                      onClick={onLogoutHandler}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
                     >
                       Sign out
-                    </a>
+                    </button>
                   </li>
                 </ul>
               </div>

@@ -24,6 +24,7 @@ if (localStorage.token) {
     },
   });
 }
+
 root.render(
   <Provider store={store}>
     <BrowserRouter>
