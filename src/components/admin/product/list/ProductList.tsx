@@ -5,22 +5,41 @@ import http_common from "../../../../http_common.ts";
 import { IProduct } from "../../../../entities/Product.ts";
 import { APP_ENV } from "../../../../env";
 import { IProductImage } from "../../../../entities/ProductImage.ts";
+import parse from "html-react-parser";
 
 function ProductList() {
   const [products, setProducts] = useState<IProduct[]>([]);
   useEffect(() => {
-    http_common.get("api/products").then((resp) => {
-      setProducts(resp.data);
-    });
+    http_common
+      .get("api/products", {
+        headers: {
+          Authorization: `Bearer ${localStorage.token}`,
+        },
+      })
+      .then((resp) => {
+        setProducts(resp.data);
+      });
   }, []);
 
   const handleDelete = async (id: number) => {
     try {
-      await http_common.delete(`api/products/${id}`).then(() => {
-        http_common.get("api/products").then((resp) => {
-          setProducts(resp.data);
+      await http_common
+        .delete(`api/products/${id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.token}`,
+          },
+        })
+        .then(() => {
+          http_common
+            .get("api/products", {
+              headers: {
+                Authorization: `Bearer ${localStorage.token}`,
+              },
+            })
+            .then((resp) => {
+              setProducts(resp.data);
+            });
         });
-      });
     } catch (error) {
       console.error("Error deleting product:", error);
     }
@@ -73,7 +92,7 @@ function ProductList() {
                     {p.id}
                   </th>
                   <td className="px-6 py-4">{p.name}</td>
-                  <td className="px-6 py-4">{p.description}</td>
+                  <td className="px-6 py-4">{parse(p.description)}</td>
                   <td className="px-6 py-4">
                     {p.images.map((i: IProductImage) => {
                       return (

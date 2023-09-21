@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { AuthUserActionType } from "../../../entities/Auth.ts";
-import { useDispatch } from "react-redux";
+import { AuthUserActionType, IAuthUser } from "../../../entities/Auth.ts";
+import { useDispatch, useSelector } from "react-redux";
 
 const DefaultHeader = () => {
   const dispatch = useDispatch();
@@ -9,6 +9,8 @@ const DefaultHeader = () => {
     localStorage.removeItem("access_token");
     dispatch({ type: AuthUserActionType.LOGOUT_USER });
   };
+
+  const { isAuth } = useSelector((store: any) => store.auth as IAuthUser);
 
   return (
     <>
@@ -86,14 +88,25 @@ const DefaultHeader = () => {
                       Earnings
                     </a>
                   </li>
-                  <li>
-                    <button
-                      onClick={onLogoutHandler}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                    >
-                      Sign out
-                    </button>
-                  </li>
+                  {isAuth ? (
+                    <li>
+                      <button
+                        onClick={onLogoutHandler}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                      >
+                        Sign out
+                      </button>
+                    </li>
+                  ) : (
+                    <li>
+                      <Link
+                        to={"/login"}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                      >
+                        Login
+                      </Link>
+                    </li>
+                  )}
                 </ul>
               </div>
               <button

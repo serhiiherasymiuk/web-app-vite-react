@@ -6,17 +6,23 @@ import { useEffect, useState } from "react";
 import http_common from "../../../../http_common.ts";
 import { IProductCreate } from "../../../../entities/Product.ts";
 import InputGroup from "../../../../common/InputGroup.tsx";
-import TextAreaGroup from "../../../../common/TextAreaGroup.tsx";
 import SelectGroup from "../../../../common/SelectGroup.tsx";
 import ImageListGroup from "../../../../common/ImageListGroup.tsx";
+import EditorTiny from "../../../../common/EditorTiny.tsx";
 
 function ProductCreate() {
   const [categories, setCategories] = useState<ICategory[]>([]);
 
   useEffect(() => {
-    http_common.get("api/categories").then((resp) => {
-      setCategories(resp.data);
-    });
+    http_common
+      .get("api/categories", {
+        headers: {
+          Authorization: `Bearer ${localStorage.token}`,
+        },
+      })
+      .then((resp) => {
+        setCategories(resp.data);
+      });
   }, []);
 
   const initialValues: IProductCreate = {
@@ -53,6 +59,7 @@ function ProductCreate() {
       await http_common.post("api/products", values, {
         headers: {
           "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${localStorage.token}`,
         },
       });
 
@@ -91,15 +98,16 @@ function ProductCreate() {
               touched={touched.name}
               handleChange={handleChange}
             ></InputGroup>
-            <TextAreaGroup
+            <EditorTiny
+              value={values.description}
               label="Description"
               field="description"
-              handleChange={handleChange}
               error={errors.description}
               touched={touched.description}
-              handleBlur={handleBlur}
-              value={values.description}
-            ></TextAreaGroup>
+              onEditorChange={(text: string) => {
+                setFieldValue("description", text);
+              }}
+            />
             <SelectGroup
               label="Category"
               field="categoryId"

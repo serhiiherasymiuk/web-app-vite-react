@@ -37,6 +37,7 @@ function Login() {
       );
       const { data } = result;
       const token = data.token;
+      http_common.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       localStorage.token = token;
       const user = jwtDecode(token) as IUser;
       dispatch({
