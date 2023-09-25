@@ -5,7 +5,7 @@ import http_common from "../../../http_common.ts";
 import { Form, Formik } from "formik";
 import InputGroup from "../../../common/InputGroup.tsx";
 
-function Register() {
+function RegisterPage() {
   const navigate = useNavigate();
 
   const initialValues: IRegister = {
@@ -105,4 +105,4 @@ function Register() {
   );
 }
 
-export default Register;
+export default RegisterPage;

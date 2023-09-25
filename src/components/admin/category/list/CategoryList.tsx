@@ -3,41 +3,22 @@ import { ICategory } from "../../../../entities/Category.ts";
 import { useNavigate } from "react-router-dom";
 import ModalDelete from "../../../../common/ModalDelete.tsx";
 import http_common from "../../../../http_common.ts";
-import { APP_ENV } from "../../../../env";
 
 function CategoryList() {
   const [categories, setCategories] = useState<ICategory[]>([]);
   useEffect(() => {
-    http_common
-      .get("api/categories", {
-        headers: {
-          Authorization: `Bearer ${localStorage.token}`,
-        },
-      })
-      .then((resp) => {
-        setCategories(resp.data);
-      });
+    http_common.get("api/categories").then((resp) => {
+      setCategories(resp.data);
+    });
   }, []);
 
   const handleDelete = async (id: number) => {
     try {
-      await http_common
-        .delete(`api/categories/${id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.token}`,
-          },
-        })
-        .then(() => {
-          http_common
-            .get("api/categories", {
-              headers: {
-                Authorization: `Bearer ${localStorage.token}`,
-              },
-            })
-            .then((resp) => {
-              setCategories(resp.data);
-            });
+      await http_common.delete(`api/categories/${id}`).then(() => {
+        http_common.get("api/categories").then((resp) => {
+          setCategories(resp.data);
         });
+      });
     } catch (error) {
       console.error("Error deleting category:", error);
     }
@@ -93,7 +74,7 @@ function CategoryList() {
                   <td className="px-6 py-4">{c.description}</td>
                   <td className="px-6 py-4">
                     <img
-                      src={`${APP_ENV.BASE_URL}/uploading/300_${c.image}`}
+                      src={`${http_common.getUri()}/uploading/300_${c.image}`}
                       alt=""
                     />
                   </td>

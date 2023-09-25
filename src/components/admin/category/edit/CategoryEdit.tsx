@@ -14,37 +14,25 @@ function CategoryEdit() {
   const { id } = useParams();
 
   useEffect(() => {
-    http_common
-      .get("api/categories", {
-        headers: {
-          Authorization: `Bearer ${localStorage.token}`,
+    http_common.get("api/categories").then((resp) => {
+      setCategories(resp.data);
+    });
+    http_common.get(`api/categories/${id}`).then(async (resp) => {
+      const response = await http_common.get(
+        `/uploading/600_${resp.data.image}`,
+        {
+          responseType: "blob",
         },
-      })
-      .then((resp) => {
-        setCategories(resp.data);
-      });
-    http_common
-      .get(`api/categories/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.token}`,
-        },
-      })
-      .then(async (resp) => {
-        const response = await http_common.get(
-          `/uploading/600_${resp.data.image}`,
-          {
-            responseType: "blob",
-          },
-        );
-        const blob = response.data;
+      );
+      const blob = response.data;
 
-        setInitialValues((prevValues) => ({
-          ...prevValues,
-          name: resp.data.name,
-          description: resp.data.description,
-          image: new File([blob], resp.data.image),
-        }));
-      });
+      setInitialValues((prevValues) => ({
+        ...prevValues,
+        name: resp.data.name,
+        description: resp.data.description,
+        image: new File([blob], resp.data.image),
+      }));
+    });
   }, []);
 
   const [initialValues, setInitialValues] = useState<ICategoryEdit>({
@@ -82,7 +70,6 @@ function CategoryEdit() {
       await http_common.put(`api/categories/${id}`, values, {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${localStorage.token}`,
         },
       });
 

@@ -8,11 +8,11 @@ import CategoryEdit from "./components/admin/category/edit/CategoryEdit.tsx";
 import ProductList from "./components/admin/product/list/ProductList.tsx";
 import ProductCreate from "./components/admin/product/create/ProductCreate.tsx";
 import ProductEdit from "./components/admin/product/edit/ProductEdit.tsx";
-import Register from "./components/auth/register/Register.tsx";
-import Login from "./components/auth/login/Login.tsx";
+import RegisterPage from "./components/auth/register/RegisterPage.tsx";
 import AdminLayout from "./components/containers/default/AdminLayout.tsx";
 import { IAuthUser } from "./entities/Auth.ts";
 import { useSelector } from "react-redux";
+import Login from "./components/auth/login";
 
 function App() {
   const { user, isAuth } = useSelector((store: any) => store.auth as IAuthUser);
@@ -20,7 +20,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<DefaultLayout />}>
-        <Route path="register" element={<Register />} />
+        <Route path="register" element={<RegisterPage />} />
         <Route path="login" element={<Login />} />
         <Route
           path="/admin"

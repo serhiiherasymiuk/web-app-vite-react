@@ -4,7 +4,7 @@ import { APP_ENV } from "./env";
 const http_common = axios.create({
   baseURL: APP_ENV.BASE_URL,
   headers: {
-    "Content-Type": "application/json",
+    "Content-type": "application/json",
   },
 });
 

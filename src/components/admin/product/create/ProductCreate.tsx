@@ -14,15 +14,9 @@ function ProductCreate() {
   const [categories, setCategories] = useState<ICategory[]>([]);
 
   useEffect(() => {
-    http_common
-      .get("api/categories", {
-        headers: {
-          Authorization: `Bearer ${localStorage.token}`,
-        },
-      })
-      .then((resp) => {
-        setCategories(resp.data);
-      });
+    http_common.get("api/categories").then((resp) => {
+      setCategories(resp.data);
+    });
   }, []);
 
   const initialValues: IProductCreate = {
@@ -59,7 +53,6 @@ function ProductCreate() {
       await http_common.post("api/products", values, {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${localStorage.token}`,
         },
       });
 

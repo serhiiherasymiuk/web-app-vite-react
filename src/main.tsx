@@ -7,6 +7,7 @@ import jwtDecode from "jwt-decode";
 import { AuthUserActionType, IUser } from "./entities/Auth.ts";
 import { store } from "./store/store.ts";
 import { Provider } from "react-redux";
+import http_common from "./http_common.ts";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,
@@ -14,6 +15,7 @@ const root = ReactDOM.createRoot(
 
 if (localStorage.token) {
   const token = localStorage.token;
+  http_common.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   const user = jwtDecode(token) as IUser;
   store.dispatch({
     type: AuthUserActionType.LOGIN_USER,

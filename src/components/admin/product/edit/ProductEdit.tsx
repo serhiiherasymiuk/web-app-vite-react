@@ -17,36 +17,24 @@ function ProductEdit() {
   const { id } = useParams();
 
   useEffect(() => {
-    http_common
-      .get("api/categories", {
-        headers: {
-          Authorization: `Bearer ${localStorage.token}`,
-        },
-      })
-      .then((resp) => {
-        setCategories(resp.data);
-      });
-    http_common
-      .get(`api/products/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.token}`,
-        },
-      })
-      .then((resp) => {
-        const images = resp.data.images.map(
-          (image: IProductImage) => `${image.image}`,
-        );
+    http_common.get("api/categories").then((resp) => {
+      setCategories(resp.data);
+    });
+    http_common.get(`api/products/${id}`).then((resp) => {
+      const images = resp.data.images.map(
+        (image: IProductImage) => `${image.image}`,
+      );
 
-        downloadAndConvertImages(images).then((files) => {
-          setInitialValues((prevValues) => ({
-            ...prevValues,
-            name: resp.data.name,
-            description: resp.data.description,
-            categoryId: resp.data.categoryId,
-            images: files,
-          }));
-        });
+      downloadAndConvertImages(images).then((files) => {
+        setInitialValues((prevValues) => ({
+          ...prevValues,
+          name: resp.data.name,
+          description: resp.data.description,
+          categoryId: resp.data.categoryId,
+          images: files,
+        }));
       });
+    });
   }, []);
 
   async function downloadAndConvertImages(images: string[]): Promise<File[]> {
@@ -103,7 +91,6 @@ function ProductEdit() {
       await http_common.put(`api/products/${id}`, values, {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${localStorage.token}`,
         },
       });
 
