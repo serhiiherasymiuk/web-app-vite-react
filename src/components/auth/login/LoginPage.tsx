@@ -1,23 +1,17 @@
 import { Form, Formik } from "formik";
 import InputGroup from "../../../common/InputGroup.tsx";
-import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import {
-  AuthUserActionType,
-  ILogin,
-  ILoginResult,
-  IUser,
-} from "../../../entities/Auth.ts";
+import { ILogin, ILoginResult } from "../../../entities/Auth.ts";
 import http_common from "../../../http_common.ts";
-import jwtDecode from "jwt-decode";
 import { useState } from "react";
 import * as Yup from "yup";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { LoginUserAction } from "../../../store/actions/AuthActions.ts";
+import { store } from "../../../store/store.ts";
 
 function LoginPage() {
   const { executeRecaptcha } = useGoogleReCaptcha();
 
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const initialValues: ILogin = {
@@ -44,19 +38,7 @@ function LoginPage() {
         "api/account/login",
         values,
       );
-      const { data } = result;
-      const token = data.token;
-      http_common.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      localStorage.token = token;
-      const user = jwtDecode(token) as IUser;
-      dispatch({
-        type: AuthUserActionType.LOGIN_USER,
-        payload: {
-          sub: user.sub,
-          email: user.email,
-          roles: user.roles,
-        },
-      });
+      LoginUserAction(store.dispatch, result.data.token);
       setMessage("");
       navigate("/");
     } catch {
