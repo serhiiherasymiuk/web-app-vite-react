@@ -1,50 +1,84 @@
-import "./App.scss";
-import CategoryList from "./components/admin/category/list/CategoryList.tsx";
-import { Navigate, Route, Routes } from "react-router-dom";
-import CategoryCreate from "./components/admin/category/create/CategoryCreate.tsx";
-import DefaultLayout from "./components/containers/default/DefaultLayout.tsx";
-import "flowbite";
-import CategoryEdit from "./components/admin/category/edit/CategoryEdit.tsx";
-import ProductList from "./components/admin/product/list/ProductList.tsx";
-import ProductCreate from "./components/admin/product/create/ProductCreate.tsx";
-import ProductEdit from "./components/admin/product/edit/ProductEdit.tsx";
-import RegisterPage from "./components/auth/register/RegisterPage.tsx";
-import AdminLayout from "./components/containers/default/AdminLayout.tsx";
-import { IAuthUser } from "./entities/Auth.ts";
-import { useSelector } from "react-redux";
-import Login from "./components/auth/login";
+import "./App.css";
+import { Suspense, lazy, useEffect, useState } from "react";
+import { Route, Routes } from "react-router-dom";
+
+// import CategoryListPage from "./components/category/list/CategoryListPage.tsx";
+// import CategoryCreatePage from "./components/category/create/CategoryCreatePage.tsx";
+// import ProductCreatePage from "./components/product/create/ProductCreatePage.tsx";
+
+import { Toaster } from "react-hot-toast";
+
+import ECommerce from "./pages/Dashboard/ECommerce";
+import SignIn from "./pages/Authentication/SignIn";
+import SignUp from "./pages/Authentication/SignUp";
+import Loader from "./common/Loader";
+import routes from "./routes";
+
+const DefaultLayout = lazy(
+  () => import("./components/containers/default/DefaultLayout.tsx"),
+);
+const AdminLayout = lazy(() => import("./layout/AdminLayout.tsx"));
+const Login = lazy(() => import("./components/auth/login/LoginPage.tsx"));
+const Register = lazy(
+  () => import("./components/auth/register/RegisterPage.tsx"),
+);
 
 function App() {
-  const { user, isAuth } = useSelector((store: any) => store.auth as IAuthUser);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  return (
-    <Routes>
-      <Route path="/" element={<DefaultLayout />}>
-        <Route path="register" element={<RegisterPage />} />
-        <Route path="login" element={<Login />} />
-        <Route
-          path="/admin"
-          element={
-            !isAuth || !(user?.roles && user.roles.includes("admin")) ? (
-              <Navigate to="/login" />
-            ) : (
-              <AdminLayout />
-            )
-          }
-        >
-          <Route path="category">
-            <Route index element={<CategoryList />} />
-            <Route path="create" element={<CategoryCreate />} />
-            <Route path="edit/:id" element={<CategoryEdit />} />
-          </Route>
-          <Route path="product">
-            <Route index element={<ProductList />} />
-            <Route path="create" element={<ProductCreate />} />
-            <Route path="edit/:id" element={<ProductEdit />} />
-          </Route>
+  useEffect(() => {
+    setTimeout(() => setLoading(false), 1000);
+  }, []);
+
+  return loading ? (
+    <Loader />
+  ) : (
+    <>
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+        containerClassName="overflow-auto"
+      />
+
+      <Routes>
+        <Route path="/auth/signin" element={<SignIn />} />
+        <Route path="/auth/signup" element={<SignUp />} />
+
+        <Route path={"/"} element={<DefaultLayout />}>
+          <Route
+            path={"login"}
+            element={
+              <Suspense fallback={<Loader />}>
+                <Login />
+              </Suspense>
+            }
+          />
+          <Route
+            path={"register"}
+            element={
+              <Suspense fallback={<Loader />}>
+                <Register />
+              </Suspense>
+            }
+          />
         </Route>
-      </Route>
-    </Routes>
+        <Route path={"/admin"} element={<AdminLayout />}>
+          <Route index element={<ECommerce />} />
+          {routes.map(({ path, component: Component }, index) => (
+            <Route
+              key={index}
+              path={path}
+              element={
+                <Suspense fallback={<Loader />}>
+                  <Component />
+                </Suspense>
+              }
+            />
+          ))}
+        </Route>
+      </Routes>
+    </>
   );
 }
+
 export default App;

@@ -1,9 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { IRegister } from "../../../entities/Auth.ts";
+import { ILoginResult, IRegister } from "../../../entities/Auth.ts";
 import * as Yup from "yup";
 import http_common from "../../../http_common.ts";
 import { Form, Formik } from "formik";
 import InputGroup from "../../../common/InputGroup.tsx";
+import { LoginUserAction } from "../../../store/actions/AuthActions.ts";
+import { store } from "../../../store/store.ts";
 
 function RegisterPage() {
   const navigate = useNavigate();
@@ -27,7 +29,11 @@ function RegisterPage() {
   const handleSubmit = async (values: IRegister) => {
     try {
       console.log(values);
-      await http_common.post("api/account/register", values);
+      const result = await http_common.post<ILoginResult>(
+        "api/account/register",
+        values,
+      );
+      LoginUserAction(store.dispatch, result.data.token);
       navigate("/");
     } catch (error) {
       console.error("Error register:", error);
@@ -36,6 +42,9 @@ function RegisterPage() {
 
   return (
     <>
+      <div className="mx-auto text-center">
+        <h1 className="text-3xl  font-bold text-black sm:text-4xl">Register</h1>
+      </div>
       <Formik
         initialValues={initialValues}
         onSubmit={handleSubmit}
