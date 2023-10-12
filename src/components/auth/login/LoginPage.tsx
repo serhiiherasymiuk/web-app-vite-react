@@ -8,6 +8,8 @@ import * as Yup from "yup";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { LoginUserAction } from "../../../store/actions/AuthActions.ts";
 import { store } from "../../../store/store.ts";
+import GoogleAuth from "../GoogleAuth";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 function LoginPage() {
   const { executeRecaptcha } = useGoogleReCaptcha();
@@ -82,6 +84,13 @@ function LoginPage() {
               touched={touched.password}
               handleChange={handleChange}
             ></InputGroup>
+            <GoogleOAuthProvider
+              clientId={
+                "982436313952-5tbme741pdht0po8i1vejs587fb2b1lc.apps.googleusercontent.com"
+              }
+            >
+              <GoogleAuth></GoogleAuth>
+            </GoogleOAuthProvider>
             <button
               type="submit"
               className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
